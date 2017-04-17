@@ -1,0 +1,55 @@
+version: '2'
+services:
+    proxy:
+        image: nginx:alpine
+        ports:
+            - "8000:80"
+        volumes_from:
+            - app
+        volumes:
+            - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+        depends_on:
+            - app
+
+    app:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile
+{% if cookiecutter.database == 'mysql' -%}
+        entrypoint: /srv/application/docker/docker-entrypoint.sh mysql 3306
+{% else %}
+        entrypoint: /srv/application/docker/docker-entrypoint.sh postgres 5432
+{%- endif %}
+        command: /srv/application/docker/start-unicorn.sh
+        volumes:
+            - .:/srv/application
+        environment:
+            DJANGO_SETTINGS_MODULE: "config.settings.production"
+            SECRET_KEY: test
+{% if cookiecutter.database == 'mysql' -%}
+            DATABASE_URL: "mysql://root:app@mysql:3306/app"
+{% else %}
+            DATABASE_URL: "psql://app:app@postgres:5432/app"
+{%- endif %}
+            EMAIL_URL: "filemail://mails"
+            FACEBOOK_KEY: test
+            FACEBOOK_SECRET: testsecret
+
+    cron:
+        extends: app
+        entrypoint: /srv/application/docker/start-cron.sh
+
+{% if cookiecutter.database == 'mysql' -%}
+    mysql:
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: app
+            MYSQL_DATABASE: app
+{% else %}
+    postgres:
+        image: postgres:9.6
+        environment:
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD: app
+            POSTGRES_DB: app
+{%- endif %}

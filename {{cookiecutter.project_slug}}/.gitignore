@@ -1,0 +1,29 @@
+# Basics
+*.py[cod]
+__pycache__
+
+# Logs
+logs
+*.log
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+htmlcov
+
+# Translations
+*.mo
+*.pot
+
+# virtual environments
+.env
+
+# User-uploaded media
+/media/
+
+staticfiles/
+
+.cache/
+development.sqlite3
