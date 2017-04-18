@@ -33,10 +33,11 @@ THIRD_PARTY_APPS = [
     'django_countries',
     'django_cron',
     'model_fields',
-{% if cookiecutter.social_authentication == 'y' -%}
+    'authtools',
+    {% if cookiecutter.social_authentication == 'y' -%}
     'social_django',
     'rest_social_auth',
-{%- endif %}
+    {%- endif %}
 ]
 
 LOCAL_APPS = [
@@ -94,9 +95,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
-CRON_CLASSES = [
-    '{{cookiecutter.project_slug}}.campaigns.cron.FetchStatisticsJob'
-]
+CRON_CLASSES = []
 
 AUTH_USER_MODEL = 'users.User'
 AUTH_PASSWORD_VALIDATORS = [
