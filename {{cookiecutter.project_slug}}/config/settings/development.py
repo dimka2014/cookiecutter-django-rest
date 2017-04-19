@@ -8,8 +8,8 @@ INTERNAL_IPS = ['127.0.0.1']
 def show_toolbar(request):
     return not request.is_ajax()
 
-MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
-INSTALLED_APPS += ['debug_toolbar', ]
+MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+INSTALLED_APPS += ['debug_toolbar', 'pympler']
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
@@ -33,6 +33,7 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
+    'pympler.panels.MemoryPanel',
 )
 
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (

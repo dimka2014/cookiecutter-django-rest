@@ -8,6 +8,10 @@ from rest_social_auth.serializers import JWTSerializer
 from .models import User
 
 
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[password_validation.validate_password])
     balance = serializers.DecimalField(read_only=True, max_digits=15, decimal_places=2, coerce_to_string=False)

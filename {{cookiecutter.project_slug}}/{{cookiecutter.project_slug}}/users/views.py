@@ -2,6 +2,7 @@ import uuid
 
 from django.db.models import Sum, DecimalField
 from rest_framework import generics, permissions, serializers, status, mixins
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 {% if cookiecutter.social_authentication == 'y' -%}
@@ -10,8 +11,7 @@ from rest_social_auth.views import JWTAuthMixin, BaseSocialAuthView
 {%- endif %}
 
 from .models import User
-from .serializers import UserSerializer, ResetPasswordSerializer, ChangePasswordSerializer{% if cookiecutter.social_authentication == 'y' -%}, UserJWTSerializer{%- endif %}
-from . import signals
+from .serializers import UserSerializer, ResetPasswordSerializer, ChangePasswordSerializer, EmailSerializer{% if cookiecutter.social_authentication == 'y' -%}, UserJWTSerializer{%- endif %}
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -28,12 +28,12 @@ class RegistrationView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save(confirmation_token=uuid.uuid4().hex, is_active=False)
-        signals.user_register.send(sender=self.__class__, user=user, request=self.request)
+        user.email_confirm_account(request=self.request)
 
 
 class EmailConfirmationView(generics.GenericAPIView):
     """
-    Confirm email by token
+    Confirm account by token
     """
     queryset = User.objects.all()
     lookup_field = 'confirmation_token'
@@ -61,16 +61,14 @@ class ResetPasswordEmailView(generics.GenericAPIView):
     authentication_classes = ()
 
     def post(self, request):
-        if 'email' in request.data:
-            try:
-                user = User.objects.get(email=request.data['email'])
-                user.reset_password_token = uuid.uuid4().hex
-                user.save()
-                signals.reset_password.send(sender=User.__class__, user=user, request=request)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except User.DoesNotExist:
-                pass
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = User.objects.get(email=serializer.data['email'])
+            user.generate_and_email_reset_password(request)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except (User.DoesNotExist, ValidationError):
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class ResetPasswordView(mixins.UpdateModelMixin, generics.GenericAPIView):
@@ -89,7 +87,7 @@ class ResetPasswordView(mixins.UpdateModelMixin, generics.GenericAPIView):
 
     def perform_update(self, serializer):
         user = serializer.save()
-        signals.password_changed.send(sender=User.__class__, user=user, request=self.request)
+        user.email_password_changed()
 
 
 class ChangePasswordView(mixins.UpdateModelMixin, generics.GenericAPIView):
@@ -108,7 +106,7 @@ class ChangePasswordView(mixins.UpdateModelMixin, generics.GenericAPIView):
 
     def perform_update(self, serializer):
         user = serializer.save()
-        signals.password_changed.send(sender=User.__class__, user=user, request=self.request)
+        user.email_password_changed()
 
 
 class UserView(generics.RetrieveAPIView):
