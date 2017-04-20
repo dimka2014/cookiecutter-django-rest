@@ -1,0 +1,7 @@
+-r base.txt
+
+coverage==4.3.4
+django-coverage-plugin==1.5.0
+pylint==1.7.1
+pylint-common==0.2.5
+pylint-django==0.7.2

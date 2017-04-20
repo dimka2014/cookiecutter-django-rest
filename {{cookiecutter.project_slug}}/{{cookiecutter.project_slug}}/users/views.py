@@ -1,6 +1,5 @@
 import uuid
 
-from django.db.models import Sum, DecimalField
 from rest_framework import generics, permissions, serializers, status, mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -11,7 +10,10 @@ from rest_social_auth.views import JWTAuthMixin, BaseSocialAuthView
 {%- endif %}
 
 from .models import User
-from .serializers import UserSerializer, ResetPasswordSerializer, ChangePasswordSerializer, EmailSerializer{% if cookiecutter.social_authentication == 'y' -%}, UserJWTSerializer{%- endif %}
+from .serializers import UserSerializer, ResetPasswordSerializer, ChangePasswordSerializer, EmailSerializer
+{% if cookiecutter.social_authentication == 'y' -%}
+from .serializers import UserJWTSerializer
+{%- endif %}
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -52,10 +54,6 @@ class ResetPasswordEmailView(generics.GenericAPIView):
     """
     Send email with token for reset password
     """
-
-    class EmailSerializer(serializers.Serializer):  # use only for doc generating
-        email = serializers.EmailField()
-
     serializer_class = EmailSerializer
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()

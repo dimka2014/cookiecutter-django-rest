@@ -28,4 +28,4 @@ jobs:
       - run:
           name: Run tests
           command: |
-            docker run --entrypoint="/srv/application/docker/test-entrypoint.sh" {{cookiecutter.project_slug}} 
+            docker run --entrypoint="/srv/application/docker/test-entrypoint.sh" -e DJANGO_SETTINGS_MODULE=config.settings.test {% if cookiecutter.social_authentication == 'y' -%}-e FACEBOOK_KEY=test -e FACEBOOK_SECRET=test_secret{%- endif %} {{cookiecutter.project_slug}} 

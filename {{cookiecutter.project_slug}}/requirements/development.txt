@@ -1,6 +1,4 @@
--r base.txt
+-r test.txt
 
 django-debug-toolbar==1.7
-coverage==4.3.4
-django-coverage-plugin==1.5.0
 Pympler==0.5

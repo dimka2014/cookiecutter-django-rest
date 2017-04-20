@@ -8,6 +8,7 @@ from rest_social_auth.serializers import JWTSerializer
 from .models import User
 
 
+# pylint: disable=abstract-method
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -60,5 +61,5 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     def validate_old_password(self, value):
         if not check_password(value, self.instance.password):
-            raise serializers.ValidationError("Invalid old password")
+            raise serializers.ValidationError('Invalid old password')
         return value
