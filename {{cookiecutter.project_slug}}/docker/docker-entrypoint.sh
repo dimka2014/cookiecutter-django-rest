@@ -6,7 +6,7 @@ shift 2
 cmd="$@"
 
 function db_ready() {
-  nc $db_host $db_port>/dev/null 2>&1
+  nc -z $db_host $db_port>/dev/null 2>&1
 }
 
 if [[ -z $db_host ]]; then
